@@ -1,0 +1,817 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Budget Tracker Service",
+    "version": "1.0.0",
+    "description": "This microservice is in charge of storing and retrieving a user's transactions and budget history. The following api documentation shows how to perform the previously mentioned actions with Budget Tracker Service."
+  },
+  "paths": {
+    "/budgets": {
+      "post": {
+        "description": "This endpoint is used to create a budget. It returns a 201 CREATED response entity containing the created budget if the request was successful or an error status code if the request failed.",
+        "operationId": "createBudget",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/budgetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The response given upon the successful creation of the budget, containing the created resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/budget"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "This endpoint is used to retrieve a list of the budgets. It returns a 200 OK response entity containing the list of budgets if the request was successful or an error status code if the request failed.",
+        "operationId": "getBudgets",
+        "responses": {
+          "200": {
+            "description": "The response given upon the successful retrieval of the budgets.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/budgets/{name}": {
+      "get": {
+        "description": "This endpoint is used to retrieve a budget. It returns a 200 OK response entity containing the budget if the request was successful or an error status code if the request failed.",
+        "operationId": "getBudget",
+        "parameters": [
+          {
+            "name": "name",
+            "description": "Specifies the desired budget.",
+            "example": "MyBalance",
+            "schema": {
+              "type": "string",
+              "description": "The name of the budget.",
+              "example": "MyBalance",
+              "minLength": 3,
+              "maxLength": 100
+            },
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "from",
+            "description": "Specifies the period from which to retrieve the budget.",
+            "example": "2024-05-03",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "to",
+            "description": "Specifies the period from which to retrieve the budget.",
+            "example": "2024-07-03",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The response given upon the successful retrieval of the budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/budget"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "This endpoint is used to delete a budget. It returns a 204 NO CONTENT response entity if the request was successful or an error status code if the request failed.",
+        "operationId": "deleteBudget",
+        "parameters": [
+          {
+            "name": "name",
+            "description": "Specifies the desired budget.",
+            "example": "MyBalance",
+            "schema": {
+              "type": "string",
+              "description": "The name of the budget.",
+              "example": "MyBalance",
+              "minLength": 3,
+              "maxLength": 100
+            },
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response given upon the successful deletion of the budget."
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/budgets/{name}/movements": {
+      "post": {
+        "description": "This endpoint is used to create a movement. It returns a 201 CREATED response entity containing the created movement if the request was successful or an error status code if the request failed.",
+        "operationId": "createMovement",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/movementDto"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "Specifies the name of the budget.",
+            "example": "MyBalance",
+            "schema": {
+              "type": "string",
+              "description": "The name of the budget.",
+              "example": "MyBalance",
+              "minLength": 3,
+              "maxLength": 100
+            },
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The response given upon the successful creation of the movement, containing the created resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/movement"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "This endpoint is used to retrieve a list of a budget's movements. It returns a 200 OK response entity containing the list of movements if the request was successful or an error status code if the request failed.",
+        "operationId": "getMovements",
+        "parameters": [
+          {
+            "name": "name",
+            "description": "Specifies the name of the budget.",
+            "example": "MyBalance",
+            "schema": {
+              "type": "string",
+              "description": "The name of the budget.",
+              "example": "MyBalance",
+              "minLength": 3,
+              "maxLength": 100
+            },
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "from",
+            "description": "Specifies the period from which to retrieve the movements.",
+            "example": "2024-05-03",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "to",
+            "description": "Specifies the period from which to retrieve the movements.",
+            "example": "2024-07-03",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The response given upon the successful retrieval of the movements.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/movement"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/budgets/{name}/movements/{id}": {
+      "put": {
+        "description": "This endpoint is used to update a movement. It returns a 204 NO CONTENT response entity if the request was successful or an error status code if the request failed.",
+        "operationId": "updateMovement",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/movementDto"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "Specifies the name of the budget.",
+            "example": "MyBalance",
+            "schema": {
+              "type": "string",
+              "description": "The name of the budget.",
+              "example": "MyBalance",
+              "minLength": 3,
+              "maxLength": 100
+            },
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "description": "Specifies the id of the movement to update.",
+            "example": "2",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response given upon the successful update of the movement."
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "This endpoint is used to delete a movement. It returns a 204 NO CONTENT response entity if the request was successful or an error status code if the request failed.",
+        "operationId": "deleteMovement",
+        "parameters": [
+          {
+            "name": "name",
+            "description": "Specifies the name of the budget.",
+            "example": "MyBalance",
+            "schema": {
+              "type": "string",
+              "description": "The name of the budget.",
+              "example": "MyBalance",
+              "minLength": 3,
+              "maxLength": 100
+            },
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "description": "Specifies the id of the movement to update.",
+            "example": "2",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response given upon the successful deletion of the movement."
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "This endpoint is used to verify the health of the service. It returns a 204 NO CONTENT if the request was successful or an error status code if the request failed.",
+        "operationId": "healthCheck",
+        "responses": {
+          "204": {
+            "description": "The response given upon the successful execution of the request."
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid Request Example",
+                    "value": {
+                      "timestamp": "2023-01-01T12:00:00",
+                      "error": "500 INTERNAL SERVER ERROR",
+                      "message": "An unexpected error occurred",
+                      "path": "/health"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The service is temporarily unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid Request Example",
+                    "value": {
+                      "timestamp": "2023-01-01T12:00:00",
+                      "error": "503 SERVICE UNAVAILABLE",
+                      "message": "The service is temporarily unavailable",
+                      "path": "/health"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Currency": {
+        "type": "string",
+        "enum": [
+          "ARS",
+          "USD"
+        ]
+      },
+      "Type": {
+        "type": "string",
+        "enum": [
+          "INCOME",
+          "EXPENSE"
+        ]
+      },
+      "budgetDto": {
+        "type": "object",
+        "description": "This object is used to represent a budget's creation request.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the budget.",
+            "example": "MyBalance",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "balance": {
+            "type": "number",
+            "format": "decimal",
+            "example": 20000,
+            "description": "The initial balance of the budget",
+            "minimum": 0,
+            "maximum": 999999999
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "groceries"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "name",
+          "currency",
+          "balance",
+          "categories"
+        ]
+      },
+      "budget": {
+        "type": "object",
+        "description": "This object is used to represent a budget.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the budget.",
+            "example": "MyBalance",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "balance": {
+            "type": "number",
+            "format": "decimal",
+            "example": 20000,
+            "description": "The current balance of the budget",
+            "minimum": 0,
+            "maximum": 999999999
+          },
+          "income": {
+            "type": "number",
+            "format": "decimal",
+            "example": 25000,
+            "description": "The income of this budget",
+            "minimum": 0,
+            "maximum": 999999999,
+            "default": 0
+          },
+          "expenses": {
+            "type": "number",
+            "format": "decimal",
+            "example": 5000,
+            "description": "The expenses of this budget",
+            "minimum": 0,
+            "maximum": 999999999,
+            "default": 0
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "groceries"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "currency",
+          "balance",
+          "income",
+          "expenses",
+          "categories"
+        ]
+      },
+      "movementDto": {
+        "type": "object",
+        "description": "This object is used to represent a movement's creation request.",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-03-12",
+            "description": "The date in which the movement was made."
+          },
+          "type": {
+            "$ref": "#/components/schemas/Type",
+            "example": "INCOME",
+            "description": "The type of movement performed (Income or Expense)."
+          },
+          "value": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2000,
+            "description": "The value amount of the movement.",
+            "minimum": 0,
+            "maximum": 999999999
+          },
+          "category": {
+            "type": "string",
+            "example": "Groceries",
+            "description": "The category that the movement belongs to."
+          },
+          "description": {
+            "type": "string",
+            "example": "Purchased groceries at the supermarket.",
+            "description": "A brief description of the movement."
+          }
+        },
+        "required": [
+          "date",
+          "type",
+          "value",
+          "category",
+          "description"
+        ]
+      },
+      "movement": {
+        "type": "object",
+        "description": "This object is used to represent a movement.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": "1",
+            "description": "The ID of the movement."
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-03-12",
+            "description": "The date in which the movement was made."
+          },
+          "type": {
+            "$ref": "#/components/schemas/Type",
+            "example": "INCOME",
+            "description": "The type of movement performed (Income or Expense)."
+          },
+          "value": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2000,
+            "description": "The value amount of the movement.",
+            "minimum": 0,
+            "maximum": 999999999
+          },
+          "total": {
+            "type": "number",
+            "format": "decimal",
+            "example": 25020,
+            "description": "The balance of the budget after this movement.",
+            "minimum": 0,
+            "maximum": 999999999
+          },
+          "category": {
+            "type": "string",
+            "example": "Groceries",
+            "description": "The category that the movement belongs to."
+          },
+          "description": {
+            "type": "string",
+            "example": "Purchased groceries at the supermarket.",
+            "description": "A brief description of the movement."
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "type",
+          "value",
+          "total",
+          "category",
+          "description"
+        ]
+      },
+      "error": {
+        "type": "object",
+        "description": "This object is used to display error details, including the timestamp of when the error occurred, the HTTP status code of the error, the error message, and the endpoint path where the error occurred.",
+        "properties": {
+          "timestamp": {
+            "nullable": false,
+            "type": "string",
+            "format": "date-time",
+            "example": "2011-06-26T19:30:00Z",
+            "description": "The exact timestamp of when the error occurred."
+          },
+          "error": {
+            "nullable": false,
+            "type": "string",
+            "example": "400 BAD REQUEST",
+            "description": "The HTTP status code of the error."
+          },
+          "message": {
+            "nullable": false,
+            "type": "string",
+            "example": "Error during request",
+            "description": "The error message."
+          },
+          "path": {
+            "nullable": false,
+            "type": "string",
+            "example": "/login",
+            "description": "The endpoint path where the error occurred."
+          }
+        }
+      }
+    }
+  }
+}
